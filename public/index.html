@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tympan · Blind test entre potes</title>
+  <meta name="description" content="Blind test multijoueur en ligne jusqu'à 8 joueurs : années, styles, artistes, plusieurs modes de jeu.">
+  <meta name="theme-color" content="#130e1f">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23130e1f'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23362a55' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='10' fill='%23ff5a5f'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23130e1f'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Tympan, accueil">
+        <span class="brand-disc" aria-hidden="true"></span>
+        <span class="brand-word">Tympan</span>
+      </a>
+      <div class="topbar-right">
+        <label class="volume" for="volume" title="Volume">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="volume" type="range" min="0" max="1" step="0.05" value="0.7" aria-label="Volume">
+        </label>
+        <span class="conn" id="conn" data-on="false" title="Connexion au serveur"></span>
+      </div>
+    </header>
+
+    <!-- ACCUEIL -->
+    <main id="screen-home" class="screen home">
+      <section class="hero">
+        <p class="eyebrow">Blind test en ligne · 2 à 8 joueurs</p>
+        <h1 class="hero-title">Trois secondes<br>pour <em>reconnaître</em>.</h1>
+        <p class="hero-sub">Crée un salon, envoie le code à tes potes, choisissez une époque, un style ou un artiste. Des extraits de 30&nbsp;secondes, quatre modes de jeu, un seul gagnant.</p>
+      </section>
+
+      <section class="entry card">
+        <form id="form-name" class="field" autocomplete="off">
+          <label for="name">Ton pseudo</label>
+          <input id="name" maxlength="16" placeholder="Ex. Tijuana" required>
+        </form>
+        <div class="entry-actions">
+          <button id="btn-create" class="btn btn-primary btn-lg" type="button">Créer un salon</button>
+          <div class="or"><span>ou</span></div>
+          <form id="form-join" class="join-row" autocomplete="off">
+            <label class="sr" for="code">Code du salon</label>
+            <input id="code" class="code-input" maxlength="4" placeholder="CODE" inputmode="text" autocapitalize="characters" spellcheck="false">
+            <button class="btn btn-ghost btn-lg" type="submit">Rejoindre</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="how">
+        <div class="how-item"><b>1</b><p>Un joueur crée le salon et partage le code ou le lien.</p></div>
+        <div class="how-item"><b>2</b><p>L'hôte choisit le mode, la playlist, le nombre de manches.</p></div>
+        <div class="how-item"><b>3</b><p>Chacun écoute sur son appareil et tape sa réponse. Les fautes de frappe passent.</p></div>
+      </section>
+    </main>
+
+    <!-- SALON -->
+    <main id="screen-lobby" class="screen lobby" hidden>
+      <section class="lobby-head">
+        <div>
+          <p class="eyebrow">Code du salon</p>
+          <div class="room-code" id="lobby-code">····</div>
+        </div>
+        <div class="lobby-share">
+          <button id="btn-copy" class="btn btn-ghost" type="button">Copier le lien d'invitation</button>
+          <span class="share-url" id="share-url"></span>
+        </div>
+      </section>
+
+      <div class="lobby-grid">
+        <section class="panel">
+          <header class="panel-head"><h2>Joueurs</h2><span class="count" id="player-count">0 / 8</span></header>
+          <ul class="slots" id="slots"></ul>
+        </section>
+
+        <section class="panel settings" id="settings">
+          <header class="panel-head"><h2>Réglages</h2><span class="host-note" id="host-note"></span></header>
+
+          <div class="setting">
+            <h3>Mode de jeu</h3>
+            <div class="modes" id="modes" role="radiogroup" aria-label="Mode de jeu"></div>
+          </div>
+
+          <div class="setting">
+            <h3>Playlist</h3>
+            <div class="tabs" id="cat-tabs" role="tablist"></div>
+            <div class="playlists" id="playlists" role="radiogroup" aria-label="Playlist"></div>
+            <div class="field custom-artist" id="custom-artist-wrap" hidden>
+              <label for="custom-artist">Nom de l'artiste</label>
+              <input id="custom-artist" maxlength="40" placeholder="Ex. Orelsan, Adele, Gorillaz…">
+            </div>
+          </div>
+
+          <div class="setting setting-row">
+            <div>
+              <h3>Manches</h3>
+              <div class="seg" id="seg-rounds"></div>
+            </div>
+            <div>
+              <h3>Temps par extrait</h3>
+              <div class="seg" id="seg-duration"></div>
+            </div>
+          </div>
+
+          <div class="start-row">
+            <button id="btn-start" class="btn btn-primary btn-lg" type="button">Lancer la partie</button>
+            <p class="wait-note" id="wait-note" hidden>En attente du lancement par l'hôte…</p>
+          </div>
+        </section>
+      </div>
+      <button id="btn-leave" class="btn btn-text" type="button">Quitter le salon</button>
+    </main>
+
+    <!-- PARTIE -->
+    <main id="screen-game" class="screen game" hidden>
+      <section class="stage">
+        <div class="stage-top">
+          <div class="round-info">
+            <span class="round-num" id="round-num">Manche 1 / 10</span>
+            <span class="round-meta" id="round-meta">Classique · Années 2000</span>
+          </div>
+          <div class="host-controls" id="host-controls" hidden>
+            <button class="btn btn-small btn-ghost" id="btn-skip" type="button">Passer</button>
+            <button class="btn btn-small btn-ghost" id="btn-stop" type="button">Terminer</button>
+          </div>
+        </div>
+
+        <div class="turntable">
+          <svg class="ring" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="ring-track" cx="110" cy="110" r="104"/>
+            <circle class="ring-bar" id="ring-bar" cx="110" cy="110" r="104"/>
+          </svg>
+          <div class="disc" id="disc">
+            <div class="disc-label" id="disc-label"><span id="disc-text">3</span></div>
+          </div>
+          <div class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <p class="status-line" id="status-line">Préparation des extraits…</p>
+
+        <div class="answer-zone">
+          <form id="form-answer" class="answer" autocomplete="off">
+            <label class="sr" for="answer">Ta réponse</label>
+            <input id="answer" maxlength="100" placeholder="Titre ou artiste…" spellcheck="false" autocapitalize="off" disabled>
+            <button class="btn btn-primary" type="submit" id="btn-answer" disabled>Valider</button>
+          </form>
+          <div class="choices" id="choices" hidden></div>
+          <div class="found" id="found">
+            <span class="chip" id="chip-title" data-on="false">Titre</span>
+            <span class="chip" id="chip-artist" data-on="false">Artiste</span>
+          </div>
+          <p class="feedback" id="feedback" aria-live="polite"></p>
+        </div>
+
+        <div class="reveal" id="reveal" hidden>
+          <div class="reveal-cover" id="reveal-cover"></div>
+          <div class="reveal-body">
+            <p class="eyebrow">C'était</p>
+            <h2 class="reveal-title" id="reveal-title"></h2>
+            <p class="reveal-artist" id="reveal-artist"></p>
+            <a class="reveal-link" id="reveal-link" target="_blank" rel="noopener">Écouter en entier sur Deezer ↗</a>
+            <ul class="gains" id="gains"></ul>
+            <div class="next-bar"><span id="next-fill"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel scoreboard">
+        <header class="panel-head"><h2>Classement</h2></header>
+        <ol class="scores" id="scores"></ol>
+        <ul class="feed" id="feed" aria-live="polite"></ul>
+      </aside>
+    </main>
+
+    <!-- FIN -->
+    <main id="screen-end" class="screen end" hidden>
+      <p class="eyebrow" id="end-eyebrow">Partie terminée</p>
+      <h1 class="end-title" id="end-title"></h1>
+      <div class="podium" id="podium"></div>
+      <ol class="final" id="final"></ol>
+      <div class="end-actions">
+        <button id="btn-again" class="btn btn-primary btn-lg" type="button">Retour au salon</button>
+        <p class="wait-note" id="end-wait" hidden>L'hôte va relancer une partie.</p>
+        <button id="btn-quit" class="btn btn-text" type="button">Quitter</button>
+      </div>
+    </main>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="assertive"></div>
+  <audio id="audio" preload="auto"></audio>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
